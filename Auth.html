@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jpound's Hostel | Account</title>
+    <link rel="stylesheet" href="Style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">Jpound's Hostel</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="About.html">About</a></li>
+            <li><a href="Contact.html">Contact</a></li>
+            <li><a href="Booking.html">Booking</a></li>
+            <li><a href="Auth.html" class="account-link">Account</a></li>
+        </ul>
+    </nav>
+
+    <main class="auth-page">
+        <section class="auth-card" aria-labelledby="authTitle">
+            <h1 id="authTitle">Your Jpound's account</h1>
+            <p class="auth-intro">Sign in to manage your hostel visits, or create an account to get started.</p>
+
+            <div id="authForms">
+                <div class="auth-tabs" role="tablist" aria-label="Account actions">
+                    <button type="button" id="loginTab" class="auth-tab active-auth-tab" onclick="switchAuthMode('login')">Log in</button>
+                    <button type="button" id="signupTab" class="auth-tab" onclick="switchAuthMode('signup')">Sign up</button>
+                </div>
+
+                <form id="loginForm" onsubmit="event.preventDefault(); logIn();">
+                    <label for="loginEmail">Email address</label>
+                    <input type="email" id="loginEmail" autocomplete="email" required>
+
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" autocomplete="current-password" required>
+
+                    <button type="submit" class="auth-submit">Log in</button>
+                    <button type="button" class="forgot-password-link" onclick="switchAuthMode('forgot')">Forgot password?</button>
+                </form>
+
+                <form id="signupForm" hidden onsubmit="event.preventDefault(); signUp();">
+                    <label for="signupName">Full name</label>
+                    <input type="text" id="signupName" autocomplete="name" required>
+
+                    <label for="signupEmail">Email address</label>
+                    <input type="email" id="signupEmail" autocomplete="email" required>
+
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" minlength="6" autocomplete="new-password" required>
+
+                    <label for="confirmPassword">Confirm password</label>
+                    <input type="password" id="confirmPassword" minlength="6" autocomplete="new-password" required>
+
+                    <button type="submit" class="auth-submit">Create account</button>
+                </form>
+
+                <form id="forgotForm" hidden onsubmit="event.preventDefault(); requestPasswordReset();">
+                    <label for="forgotEmail">Email address</label>
+                    <input type="email" id="forgotEmail" autocomplete="email" required>
+
+                    <button type="submit" class="auth-submit">Send reset link</button>
+                    <button type="button" class="auth-submit" onclick="switchAuthMode('login')">Back to login</button>
+                </form>
+
+                <form id="resetForm" hidden onsubmit="event.preventDefault(); resetPassword();">
+                    <label for="resetEmail">Email address</label>
+                    <input type="email" id="resetEmail" autocomplete="email" required>
+
+                    <label for="resetToken">Reset token</label>
+                    <input type="text" id="resetToken" placeholder="Paste reset token here" required>
+
+                    <label for="newPassword">New password</label>
+                    <input type="password" id="newPassword" minlength="6" autocomplete="new-password" required>
+
+                    <label for="confirmResetPassword">Confirm new password</label>
+                    <input type="password" id="confirmResetPassword" minlength="6" autocomplete="new-password" required>
+
+                    <button type="submit" class="auth-submit">Reset password</button>
+                    <button type="button" class="auth-submit" onclick="switchAuthMode('login')">Cancel</button>
+                </form>
+            </div>
+
+            <div id="loggedIn" class="logged-in" hidden>
+                <p>You are logged in as <strong id="userName"></strong>.</p>
+                <a class="auth-submit auth-link" href="Booking.html">Book a room</a>
+                <button type="button" class="logout-button" onclick="logOut()">Log out</button>
+            </div>
+
+            <p id="authMessage" class="auth-message" role="status" aria-live="polite"></p>
+            <p class="auth-note">Your account is saved securely in the Jpound's database.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2026 Jpound's Hostel. All Rights Reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
