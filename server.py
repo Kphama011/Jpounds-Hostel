@@ -296,23 +296,24 @@ class JpoundsHandler(BaseHTTPRequestHandler):
     def get_availability(self, query):
         check_in = query.get("check_in", [""])[0]
         check_out = query.get("check_out", [""])[0]
-        if not check_in or not check_out or check_in >= check_out:
-            self.send_json(400, {"error": "Choose a valid check-in and check-out date."})
-            return
 
         with connect_database() as connection:
             rooms = []
             for room_id, room in ROOMS.items():
-                occupied = self.get_occupied_beds(connection, room_id, check_in, check_out)
-                available_beds = [bed for bed in room["beds"] if bed not in occupied]
-                if available_beds:
-                    rooms.append({
-                        "id": room_id,
-                        "name": room["name"],
-                        "capacity": len(room["beds"]),
-                        "beds": room["beds"],
-                        "available_beds": available_beds,
-                    })
+                if not check_in or not check_out or check_in >= check_out:
+                    available_beds = list(room["beds"])
+                else:
+                    occupied = self.get_occupied_beds(connection, room_id, check_in, check_out)
+                    available_beds = [bed for bed in room["beds"] if bed not in occupied]
+
+                rooms.append({
+                    "id": room_id,
+                    "name": room["name"],
+                    "capacity": len(room["beds"]),
+                    "beds": room["beds"],
+                    "available_beds": available_beds,
+                })
+
         self.send_json(200, {"rooms": rooms})
 
     def do_GET(self):

@@ -2,13 +2,35 @@ let selectedRoom = null;
 let selectedBeds = [];
 let availableBeds = {};
 let availabilityRequest = 0;
+const defaultBeds = {
+    1: ["A1", "A2", "B1", "B2"],
+    2: ["A1", "A2", "B1", "B2"],
+    3: ["A1", "A2", "B1", "B2"],
+    4: ["A1", "A2", "B1", "B2"],
+    5: ["A1", "A2", "B1", "B2"],
+    8: ["A1", "B1"],
+    9: ["A1", "B1"]
+};
 
 async function loadAvailability() {
     const checkIn = document.getElementById("checkIn")?.value;
     const checkOut = document.getElementById("checkOut")?.value;
-    if (!checkIn || !checkOut || checkIn >= checkOut) return;
-
+    const roomCards = document.querySelectorAll(".room-card");
+    const hasValidDates = checkIn && checkOut && checkIn < checkOut;
     const requestId = ++availabilityRequest;
+
+    if (!hasValidDates) {
+        availableBeds = defaultBeds;
+        roomCards.forEach((element) => {
+            element.hidden = false;
+            element.classList.remove("selected-room");
+        });
+        selectedRoom = null;
+        selectedBeds = [];
+        document.getElementById("bedSection").style.display = "none";
+        return;
+    }
+
     const response = await fetch(`/api/availability?check_in=${encodeURIComponent(checkIn)}&check_out=${encodeURIComponent(checkOut)}`);
     const result = await response.json();
     if (requestId !== availabilityRequest || !response.ok) return;
@@ -16,9 +38,9 @@ async function loadAvailability() {
     availableBeds = Object.fromEntries(
         result.rooms.map((room) => [room.id, room.available_beds])
     );
-    document.querySelectorAll(".room-card").forEach((element) => {
+    roomCards.forEach((element) => {
         const room = Number(element.id.replace("room", ""));
-        element.hidden = !(availableBeds[room]?.length);
+        element.hidden = hasValidDates && !(availableBeds[room]?.length);
         element.classList.remove("selected-room");
     });
 
@@ -345,7 +367,9 @@ async function updateAuthState() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    switchAuthMode("login");
     updateAuthState();
+    loadAvailability();
     document.getElementById("checkIn")?.addEventListener("change", loadAvailability);
     document.getElementById("checkOut")?.addEventListener("change", loadAvailability);
 });
