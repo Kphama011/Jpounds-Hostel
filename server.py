@@ -4,6 +4,7 @@ from pathlib import Path
 import hashlib
 import json
 import mimetypes
+import os
 import secrets
 import sqlite3
 import time
@@ -85,15 +86,39 @@ def read_json(handler):
 
 
 class JpoundsHandler(BaseHTTPRequestHandler):
+    def cors_headers(self):
+        origin = self.headers.get("Origin", "")
+        allowed_origins = {
+            "https://kphama011.github.io",
+            "http://127.0.0.1:8000",
+            "http://localhost:8000",
+        }
+        if origin in allowed_origins:
+            return {
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Vary": "Origin",
+            }
+        return {}
+
     def send_json(self, status, payload, extra_headers=None):
         body = json.dumps(payload).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
-        for key, value in (extra_headers or {}).items():
+        headers = self.cors_headers()
+        headers.update(extra_headers or {})
+        for key, value in headers.items():
             self.send_header(key, value)
         self.end_headers()
         self.wfile.write(body)
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        for key, value in self.cors_headers().items():
+            self.send_header(key, value)
+        self.end_headers()
 
     def get_session(self):
         header = self.headers.get("Cookie", "")
@@ -348,8 +373,10 @@ class JpoundsHandler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     initialize_database()
-    server = ThreadingHTTPServer(("127.0.0.1", 8000), JpoundsHandler)
-    print("Jpound's Hostel is running at http://127.0.0.1:8000")
+    host = "0.0.0.0"
+    port = int(os.environ.get("PORT", "8000"))
+    server = ThreadingHTTPServer((host, port), JpoundsHandler)
+    print(f"Jpound's Hostel is running on port {port}")
     print(f"Database: {DATABASE}")
     try:
         server.serve_forever()

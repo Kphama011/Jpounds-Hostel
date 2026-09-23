@@ -2,6 +2,17 @@ let selectedRoom = null;
 let selectedBeds = [];
 let availableBeds = {};
 let availabilityRequest = 0;
+const API_BASE_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+    ? ""
+    : "https://jpounds-hostel.onrender.com";
+
+function apiFetch(path, options = {}) {
+    return fetch(`${API_BASE_URL}${path}`, {
+        credentials: "include",
+        ...options
+    });
+}
+
 const defaultBeds = {
     1: ["A1", "A2", "B1", "B2"],
     2: ["A1", "A2", "B1", "B2"],
@@ -31,7 +42,7 @@ async function loadAvailability() {
         return;
     }
 
-    const response = await fetch(`/api/availability?check_in=${encodeURIComponent(checkIn)}&check_out=${encodeURIComponent(checkOut)}`);
+    const response = await apiFetch(`/api/availability?check_in=${encodeURIComponent(checkIn)}&check_out=${encodeURIComponent(checkOut)}`);
     const result = await response.json();
     if (requestId !== availabilityRequest || !response.ok) return;
 
@@ -152,7 +163,7 @@ async function bookRoom() {
         return;
     }
 
-    const response = await fetch("/api/bookings", {
+    const response = await apiFetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -242,7 +253,7 @@ async function signUp() {
         return;
     }
 
-    const response = await fetch("/api/signup", {
+    const response = await apiFetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password })
@@ -268,7 +279,7 @@ async function logIn() {
         return;
     }
 
-    const response = await fetch("/api/login", {
+    const response = await apiFetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
@@ -291,7 +302,7 @@ async function requestPasswordReset() {
         return;
     }
 
-    const response = await fetch("/api/forgot-password", {
+    const response = await apiFetch("/api/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email })
@@ -326,7 +337,7 @@ async function resetPassword() {
         return;
     }
 
-    const response = await fetch("/api/reset-password", {
+    const response = await apiFetch("/api/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, token, password })
@@ -340,7 +351,7 @@ async function resetPassword() {
 }
 
 async function logOut() {
-    await fetch("/api/logout", { method: "POST" });
+    await apiFetch("/api/logout", { method: "POST" });
     updateAuthState();
     switchAuthMode("login");
     showAuthMessage("You have been logged out.", true);
@@ -353,7 +364,7 @@ async function updateAuthState() {
 
     if (!authForms || !loggedIn) return;
 
-    const response = await fetch("/api/session");
+    const response = await apiFetch("/api/session");
     const result = await response.json();
 
     if (result.user) {
